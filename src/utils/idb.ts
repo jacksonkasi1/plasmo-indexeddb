@@ -1,19 +1,41 @@
 // utils/idb.ts
 
-import { openDB } from "idb"
+import { openDB, type IDBPDatabase } from "idb"
+
+interface StoreIndex {
+  name: string
+  keyPath: string | string[]
+  unique: boolean
+  multiEntry: boolean
+}
+
+interface StoreData {
+  keyPath: IDBObjectStore["keyPath"]
+  autoIncrement: boolean
+  indexes: StoreIndex[]
+  data: any[]
+}
+
+interface DatabaseData {
+  [storeName: string]: StoreData
+}
 
 export const exportDatabase = async (dbName: string): Promise<string> => {
-  const db = await openDB(dbName)
-  const data: Record<string, any> = {}
+  const db: IDBPDatabase | undefined = await openDB(dbName).catch((err) => {
+    console.error("Failed to open database:", err)
+    return undefined
+  })
 
+  if (!db) throw new Error("Database could not be opened.")
+
+  const data: DatabaseData = {}
   const tx = db.transaction(db.objectStoreNames, "readonly")
+
   for (const storeName of db.objectStoreNames) {
     const store = tx.objectStore(storeName)
     const items = await store.getAll()
-    data[storeName] = {
-      keyPath: store.keyPath,
-      autoIncrement: store.autoIncrement,
-      indexes: Array.from(store.indexNames).map((indexName) => {
+    const indexes: StoreIndex[] = Array.from(store.indexNames).map(
+      (indexName) => {
         const index = store.index(indexName)
         return {
           name: index.name,
@@ -21,17 +43,27 @@ export const exportDatabase = async (dbName: string): Promise<string> => {
           unique: index.unique,
           multiEntry: index.multiEntry
         }
-      }),
+      }
+    )
+    data[storeName] = {
+      keyPath: store.keyPath,
+      autoIncrement: store.autoIncrement,
+      indexes,
       data: items
     }
   }
+
   db.close()
   return JSON.stringify(data)
 }
 
 export const importDatabase = async (dbName: string, jsonData: string) => {
-  const data = JSON.parse(jsonData)
-  await indexedDB.deleteDatabase(dbName)
+  const data: DatabaseData = JSON.parse(jsonData)
+
+  // Delete existing database
+  indexedDB.deleteDatabase(dbName)
+
+  // Re-create database with imported structure
   const db = await openDB(dbName, 1, {
     upgrade(db) {
       for (const storeName in data) {
@@ -40,13 +72,17 @@ export const importDatabase = async (dbName: string, jsonData: string) => {
           keyPath,
           autoIncrement
         })
-        indexes.forEach(({ name, keyPath, unique, multiEntry }: any) => {
-          objectStore.createIndex(name, keyPath, { unique, multiEntry })
+        indexes.forEach((index) => {
+          objectStore.createIndex(index.name, index.keyPath, {
+            unique: index.unique,
+            multiEntry: index.multiEntry
+          })
         })
       }
     }
   })
 
+  // Populate data in the newly created database
   for (const storeName in data) {
     const { data: items } = data[storeName]
     const tx = db.transaction(storeName, "readwrite")
@@ -56,5 +92,6 @@ export const importDatabase = async (dbName: string, jsonData: string) => {
     }
     await tx.done
   }
+
   db.close()
 }
