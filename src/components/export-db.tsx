@@ -6,16 +6,20 @@ const ExportDB = () => {
 
   const fetchDatabases = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs[0]?.id) return
+      if (!tabs || tabs.length === 0 || !tabs[0]?.id) {
+        alert("No active tab found.")
+        return
+      }
+
       chrome.tabs.sendMessage(
         tabs[0].id,
         { action: "listDatabases" },
         (response) => {
           if (chrome.runtime.lastError) {
-            alert("Error: " + chrome.runtime.lastError.message)
+            alert(`Error: ${chrome.runtime.lastError.message}`)
             return
           }
-          setDatabases(response?.databases || [])
+          setDatabases((response && response.databases) || [])
         }
       )
     })
@@ -42,9 +46,11 @@ const ExportDB = () => {
             alert(
               `Failed to export ${dbName}: ${chrome.runtime.lastError.message}`
             )
-          } else if (response.error) {
+            return
+          } else if (response?.error) {
             alert(`Failed to export ${dbName}: ${response.error}`)
-          } else {
+            return
+          } else if (response?.json) {
             const blob = new Blob([response.json], { type: "application/json" })
             const url = URL.createObjectURL(blob)
 
@@ -68,7 +74,7 @@ const ExportDB = () => {
         Fetch Databases
       </button>
 
-      {databases && databases.length > 0 && (
+      {databases.length > 0 && (
         <div>
           <div className="border border-gray-100 rounded">
             <table className="w-full">
@@ -90,13 +96,19 @@ const ExportDB = () => {
                     style={{
                       animation: `fadeIn 0.2s ease-out forwards ${index * 0.05}s`
                     }}
-                    onClick={() => toggleSelection(db)}>
+                    onClick={() => {
+                      toggleSelection(db)
+                    }}>
                     <td className="px-2 py-1.5 text-center">
                       <input
                         type="checkbox"
                         checked={selectedDbs.has(db)}
-                        onChange={() => toggleSelection(db)}
-                        onClick={(e) => e.stopPropagation()} // Prevent row click event
+                        onChange={() => {
+                          toggleSelection(db)
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                        }} // Prevent row click event
                         className="w-3 h-3 text-blue-500 border-gray-300 rounded"
                       />
                     </td>
