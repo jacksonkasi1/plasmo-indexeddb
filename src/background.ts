@@ -1,38 +1,48 @@
 // background.ts
 
+interface Message {
+  action: "listDatabases" | "exportDatabase" | "importDatabase"
+  dbName?: string
+  jsonData?: string
+}
+
+interface ResponseData {
+  databases?: string[]
+  json?: string
+  success?: boolean
+  error?: string
+}
+
 chrome.runtime.onMessage.addListener(
   (
-    message: { action: string },
+    message: Message,
     sender: chrome.runtime.MessageSender,
-    sendResponse: (response: any) => void
+    sendResponse: (response: ResponseData) => void
   ) => {
-    if (!message || typeof message.action !== "string") {
-      sendResponse({ error: "Invalid message format" })
-      return
-    }
-
     if (
-      ["listDatabases", "exportDatabase", "importDatabase"].includes(
+      !["listDatabases", "exportDatabase", "importDatabase"].includes(
         message.action
       )
     ) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs || tabs.length === 0 || !tabs[0]?.id) {
-          sendResponse({ error: "No active tab found." })
-          return
-        }
-
-        chrome.tabs.sendMessage(tabs[0].id, message, (result) => {
-          if (chrome.runtime.lastError) {
-            sendResponse({ error: chrome.runtime.lastError.message })
-          } else {
-            sendResponse(result)
-          }
-        })
-      })
-      return true
-    } else {
       sendResponse({ error: "Unknown action" })
+      return
     }
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs || tabs.length === 0 || !tabs[0]?.id) {
+        sendResponse({ error: "No active tab found." })
+        return
+      }
+
+      chrome.tabs.sendMessage(tabs[0].id, message, (result) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ error: chrome.runtime.lastError.message })
+        } else {
+          sendResponse(result as ResponseData)
+        }
+      })
+    })
+
+    return true // Keeps the messaging channel open for async response
   }
 )
