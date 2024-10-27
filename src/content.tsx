@@ -6,27 +6,27 @@ export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"]
 }
 
-// content.tsx
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  console.log("Message received in content script:", message)
-
+const messageHandler = async (message) => {
   try {
     if (message.action === "listDatabases") {
       const databases = await indexedDB.databases()
-      const dbNames = databases.map((db) => db.name).filter(Boolean) as string[]
-      console.log("Databases found:", dbNames)
-      sendResponse({ databases: dbNames })
+      const dbNames = databases.map((db) => db.name).filter(Boolean)
+      return { databases: dbNames }
     } else if (message.action === "exportDatabase") {
       const json = await exportDatabase(message.dbName)
-      sendResponse({ json })
+      return { json }
     } else if (message.action === "importDatabase") {
       await importDatabase(message.dbName, message.jsonData)
-      sendResponse({ success: true })
+      return { success: true }
     }
   } catch (error) {
-    sendResponse({ error: error.message })
+    return { error: error.message }
   }
-  return true // Keep the message port open for async response
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  messageHandler(message).then(sendResponse)
+  return true
 })
 
 const exportDatabase = async (dbName: string): Promise<string> => {

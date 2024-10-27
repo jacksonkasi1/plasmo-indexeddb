@@ -10,26 +10,18 @@ const ExportDB: React.FC<ExportDBProps> = ({ databases, setDatabases }) => {
   const [selectedDbs, setSelectedDbs] = useState<Set<string>>(new Set())
 
   const fetchDatabases = () => {
-    console.log("Fetching databases...")
-    chrome.runtime.sendMessage({ action: "listDatabases" }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error(
-          "Error fetching databases:",
-          chrome.runtime.lastError.message
-        )
-        alert("Error fetching databases: " + chrome.runtime.lastError.message)
-      } else if (response.error) {
-        console.error("Error fetching databases:", response.error)
-        alert("Error fetching databases: " + response.error)
-      } else {
-        console.log("Databases fetched successfully:", response.databases)
-        setDatabases(response.databases || [])
-        if (!response.databases?.length) {
-          alert("No databases available for export.")
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs[0]?.id) return;
+      chrome.tabs.sendMessage(tabs[0].id, { action: "listDatabases" }, (response) => {
+        if (chrome.runtime.lastError) {
+          alert("Error: " + chrome.runtime.lastError.message);
+          return;
         }
-      }
-    })
-  }
+        setDatabases(response?.databases || []);
+      });
+    });
+  };
+
 
   const toggleSelection = (dbName: string) => {
     setSelectedDbs((prev) => {
