@@ -67,7 +67,6 @@ const ExportDB = () => {
         Fetch Databases
       </button>
 
-    
       {databases && databases.length > 0 && (
         <div>
           <div className="border border-gray-100 rounded">
@@ -84,7 +83,10 @@ const ExportDB = () => {
               </thead>
               <tbody>
                 {databases.map((db) => (
-                  <tr key={db} className="hover:bg-gray-50">
+                  <tr
+                    key={db}
+                    className="cursor-pointer hover:bg-gray-50"
+                    onClick={() => toggleSelection(db)}>
                     <td className="px-2 py-1.5 text-center">
                       <input
                         type="checkbox"
@@ -99,11 +101,10 @@ const ExportDB = () => {
               </tbody>
             </table>
           </div>
-          
+
           <button
             className="btn-primary mt-4 w-full"
-            onClick={exportSelectedDbs}
-          >
+            onClick={exportSelectedDbs}>
             Export Selected
           </button>
         </div>
