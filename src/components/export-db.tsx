@@ -1,5 +1,3 @@
-// export-db.tsx
-
 import React, { useState } from "react"
 
 const ExportDB = () => {
@@ -66,7 +64,7 @@ const ExportDB = () => {
 
   return (
     <div className="px-3 bg-white">
-      <button className="btn mb-4 w-full" onClick={fetchDatabases}>
+      <button className="w-full mb-4 btn" onClick={fetchDatabases}>
         Fetch Databases
       </button>
 
@@ -88,7 +86,7 @@ const ExportDB = () => {
                 {databases.map((db, index) => (
                   <tr
                     key={db}
-                    className="cursor-pointer hover:bg-gray-50 transition duration-300 ease-in-out opacity-0 translate-y-4"
+                    className="transition duration-300 ease-in-out translate-y-4 opacity-0 cursor-pointer hover:bg-gray-50"
                     style={{
                       animation: `fadeIn 0.2s ease-out forwards ${index * 0.05}s`
                     }}
@@ -98,6 +96,7 @@ const ExportDB = () => {
                         type="checkbox"
                         checked={selectedDbs.has(db)}
                         onChange={() => toggleSelection(db)}
+                        onClick={(e) => e.stopPropagation()} // Prevent row click event
                         className="w-3 h-3 text-blue-500 border-gray-300 rounded"
                       />
                     </td>
@@ -109,7 +108,7 @@ const ExportDB = () => {
           </div>
 
           <button
-            className="btn-primary mt-4 w-full"
+            className="w-full mt-4 btn-primary"
             onClick={exportSelectedDbs}>
             Export Selected
           </button>
