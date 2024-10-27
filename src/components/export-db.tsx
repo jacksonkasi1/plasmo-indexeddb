@@ -82,10 +82,13 @@ const ExportDB = () => {
                 </tr>
               </thead>
               <tbody>
-                {databases.map((db) => (
+                {databases.map((db, index) => (
                   <tr
                     key={db}
-                    className="cursor-pointer hover:bg-gray-50"
+                    className="cursor-pointer hover:bg-gray-50 transition duration-300 ease-in-out opacity-0 translate-y-4"
+                    style={{
+                      animation: `fadeIn 0.2s ease-out forwards ${index * 0.05}s`
+                    }}
                     onClick={() => toggleSelection(db)}>
                     <td className="px-2 py-1.5 text-center">
                       <input
