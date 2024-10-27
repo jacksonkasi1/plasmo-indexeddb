@@ -1,24 +1,62 @@
-import cssText from "data-text:~style.css"
+// content.tsx
+import { openDB } from "idb"
 import type { PlasmoCSConfig } from "plasmo"
 
-import { CountButton } from "@/features/count-button"
-
 export const config: PlasmoCSConfig = {
-  matches: ["https://www.plasmo.com/*"]
+  matches: ["<all_urls>"]
 }
 
-export const getStyle = () => {
-  const style = document.createElement("style")
-  style.textContent = cssText
-  return style
+// content.tsx
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  console.log("Message received in content script:", message)
+
+  try {
+    if (message.action === "listDatabases") {
+      const databases = await indexedDB.databases()
+      const dbNames = databases.map((db) => db.name).filter(Boolean) as string[]
+      console.log("Databases found:", dbNames)
+      sendResponse({ databases: dbNames })
+    } else if (message.action === "exportDatabase") {
+      const json = await exportDatabase(message.dbName)
+      sendResponse({ json })
+    } else if (message.action === "importDatabase") {
+      await importDatabase(message.dbName, message.jsonData)
+      sendResponse({ success: true })
+    }
+  } catch (error) {
+    sendResponse({ error: error.message })
+  }
+  return true // Keep the message port open for async response
+})
+
+const exportDatabase = async (dbName: string): Promise<string> => {
+  const db = await openDB(dbName)
+  const data: { [key: string]: any[] } = {}
+  for (const storeName of db.objectStoreNames) {
+    const items = await db.getAll(storeName)
+    data[storeName] = items
+  }
+  db.close()
+  return JSON.stringify(data)
 }
 
-const PlasmoOverlay = () => {
-  return (
-    <div className="plasmo-z-50 plasmo-flex plasmo-fixed plasmo-top-32 plasmo-right-8">
-      <CountButton />
-    </div>
-  )
+const importDatabase = async (dbName: string, jsonData: string) => {
+  const data: { [key: string]: any[] } = JSON.parse(jsonData)
+  await indexedDB.deleteDatabase(dbName)
+  const db = await openDB(dbName, 1, {
+    upgrade(db) {
+      for (const storeName in data) {
+        db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true })
+      }
+    }
+  })
+  for (const storeName in data) {
+    const tx = db.transaction(storeName, "readwrite")
+    const store = tx.objectStore(storeName)
+    for (const item of data[storeName]) {
+      await store.put(item)
+    }
+    await tx.done
+  }
+  db.close()
 }
-
-export default PlasmoOverlay

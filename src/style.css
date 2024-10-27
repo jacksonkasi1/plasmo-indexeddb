@@ -5,7 +5,22 @@
 @tailwind utilities;
 
 /* Tailwind CSS styles for Popup buttons */
+/* Button styles */
 .btn {
   @apply px-4 py-2 bg-blue-600 text-white rounded-lg shadow;
   @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300;
+}
+
+/* Table styles */
+table {
+  @apply border-collapse;
+}
+
+th,
+td {
+  @apply p-2 border;
+}
+
+th {
+  @apply bg-gray-100 font-medium;
 }

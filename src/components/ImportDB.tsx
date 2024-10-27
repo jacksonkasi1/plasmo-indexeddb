@@ -1,7 +1,8 @@
+// ImportDB.tsx
+import React from "react"
+
 const ImportDB = () => {
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       const jsonData = await file.text()
@@ -10,8 +11,13 @@ const ImportDB = () => {
         chrome.runtime.sendMessage(
           { action: "importDatabase", dbName, jsonData },
           (response) => {
-            if (response.success) alert("Database imported successfully!")
-            else alert("Error importing the database.")
+            if (chrome.runtime.lastError) {
+              alert(`Error importing the database: ${chrome.runtime.lastError.message}`)
+            } else if (response.error) {
+              alert(`Error importing the database: ${response.error}`)
+            } else {
+              alert("Database imported successfully!")
+            }
           }
         )
       }
@@ -20,8 +26,16 @@ const ImportDB = () => {
 
   return (
     <div className="mt-4">
-      <button className="btn mb-2">Import DB</button>
-      <input type="file" className="mt-2 block" onChange={handleFileChange} />
+      <button className="btn mb-2" onClick={() => document.getElementById('importFileInput')?.click()}>
+        Import DB
+      </button>
+      <input
+        type="file"
+        id="importFileInput"
+        className="mt-2 block"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
     </div>
   )
 }

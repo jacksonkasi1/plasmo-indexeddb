@@ -27,8 +27,18 @@
     "typescript": "5.3.3"
   },
   "manifest": {
+    "permissions": [
+      "activeTab",
+      "downloads",
+      "storage",
+      "scripting",
+      "tabs"
+    ],
     "host_permissions": [
-      "https://*/*"
-    ]
+      "<all_urls>"
+    ],
+    "background": {
+      "service_worker": "background.ts"
+    }
   }
 }
