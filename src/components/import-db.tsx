@@ -1,4 +1,4 @@
-// ImportDB.tsx
+// import-db.tsx
 
 import React from "react"
 
