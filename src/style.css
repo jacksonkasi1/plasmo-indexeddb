@@ -4,11 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind CSS styles for Popup buttons */
+
+
 /* Button styles */
 .btn {
-  @apply px-4 py-2 bg-blue-600 text-white rounded-lg shadow;
-  @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300;
+  @apply w-full px-3 py-1.5 text-sm text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition-colors;
+}
+
+.btn-primary {
+  @apply w-full px-3 py-1.5 mt-3 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors;
 }
 
 /* Table styles */

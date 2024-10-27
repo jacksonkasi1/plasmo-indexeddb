@@ -1,8 +1,9 @@
-// ImportDB.tsx
 import React from "react"
 
 const ImportDB = () => {
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0]
     if (file) {
       const jsonData = await file.text()
@@ -12,7 +13,9 @@ const ImportDB = () => {
           { action: "importDatabase", dbName, jsonData },
           (response) => {
             if (chrome.runtime.lastError) {
-              alert(`Error importing the database: ${chrome.runtime.lastError.message}`)
+              alert(
+                `Error importing the database: ${chrome.runtime.lastError.message}`
+              )
             } else if (response.error) {
               alert(`Error importing the database: ${response.error}`)
             } else {
@@ -25,8 +28,10 @@ const ImportDB = () => {
   }
 
   return (
-    <div className="mt-4">
-      <button className="btn mb-2" onClick={() => document.getElementById('importFileInput')?.click()}>
+    <div className="px-3">
+      <button
+        className="btn"
+        onClick={() => document.getElementById("importFileInput")?.click()}>
         Import DB
       </button>
       <input
