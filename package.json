@@ -1,8 +1,8 @@
 {
-  "name": "plasmo-indexddb",
-  "displayName": "Plasmo indexddb",
+  "name": "plasmo-idb-manager",
+  "displayName": "Plasmo IndexedDB Manager",
   "version": "0.0.1",
-  "description": "A basic Plasmo extension.",
+  "description": "A Plasmo extension for managing IndexedDB databases, enabling export, import, and listing of databases in any tab.",
   "author": "Jackson kasi <jacksonkasipeacock@gmail.com>",
   "scripts": {
     "dev": "plasmo dev",
