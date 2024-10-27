@@ -58,9 +58,9 @@ const ExportDB = () => {
             )
             return
           }
-          if (response?.error) {
+          if (response.error) {
             alert(`Failed to export ${dbName}: ${response.error}`)
-          } else if (response?.json) {
+          } else if (response.json) {
             const blob = new Blob([response.json], { type: "application/json" })
             const url = URL.createObjectURL(blob)
 
