@@ -1,13 +1,27 @@
-import { CountButton } from "@/features/count-button"
+import { useState } from "react"
+import ExportDB from "./components/ExportDB"
+import ImportDB from "./components/ImportDB"
 
-import "~style.css"
+import "@/style.css"
 
-function IndexPopup() {
+const Popup = () => {
+  const [selectedDb, setSelectedDb] = useState<string | null>(null)
+  const [databases, setDatabases] = useState<string[]>([])
+
   return (
-    <div className="plasmo-flex plasmo-items-center plasmo-justify-center plasmo-h-16 plasmo-w-40">
-      <CountButton />
+    <div className="p-4 w-80">
+      <h1 className="text-lg font-semibold mb-4">IndexedDB Manager</h1>
+
+      <ExportDB
+        databases={databases}
+        setDatabases={setDatabases}
+        selectedDb={selectedDb}
+        setSelectedDb={setSelectedDb}
+      />
+
+      <ImportDB />
     </div>
   )
 }
 
-export default IndexPopup
+export default Popup
