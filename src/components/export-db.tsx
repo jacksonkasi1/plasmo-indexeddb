@@ -1,5 +1,11 @@
 import React, { useState } from "react"
 
+interface DatabaseResponse {
+  databases?: string[]
+  error?: string
+  json?: string
+}
+
 const ExportDB = () => {
   const [databases, setDatabases] = useState<string[]>([])
   const [selectedDbs, setSelectedDbs] = useState<Set<string>>(new Set())
@@ -14,12 +20,16 @@ const ExportDB = () => {
       chrome.tabs.sendMessage(
         tabs[0].id,
         { action: "listDatabases" },
-        (response) => {
+        (response: DatabaseResponse) => {
           if (chrome.runtime.lastError) {
             alert(`Error: ${chrome.runtime.lastError.message}`)
             return
           }
-          setDatabases((response && response.databases) || [])
+          if (response?.databases) {
+            setDatabases(response.databases)
+          } else {
+            alert("Failed to retrieve databases.")
+          }
         }
       )
     })
@@ -41,15 +51,15 @@ const ExportDB = () => {
     selectedDbs.forEach((dbName) => {
       chrome.runtime.sendMessage(
         { action: "exportDatabase", dbName },
-        (response) => {
+        (response: DatabaseResponse) => {
           if (chrome.runtime.lastError) {
             alert(
               `Failed to export ${dbName}: ${chrome.runtime.lastError.message}`
             )
             return
-          } else if (response?.error) {
+          }
+          if (response?.error) {
             alert(`Failed to export ${dbName}: ${response.error}`)
-            return
           } else if (response?.json) {
             const blob = new Blob([response.json], { type: "application/json" })
             const url = URL.createObjectURL(blob)
@@ -62,6 +72,8 @@ const ExportDB = () => {
               saveAs: true
             })
             console.log(`Exported ${dbName}`)
+          } else {
+            alert(`Failed to export ${dbName}: Unknown error`)
           }
         }
       )
