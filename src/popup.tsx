@@ -1,6 +1,8 @@
+// popup.tsx
+
 // ** import components
-import ExportDB from "@/components/ExportDB"
-import ImportDB from "@/components/ImportDB"
+import ExportDB from "@/components/export-db"
+import ImportDB from "@/components/import-db"
 
 import "@/style.css"
 

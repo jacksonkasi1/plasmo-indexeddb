@@ -1,4 +1,5 @@
 // content.tsx
+
 import { openDB } from "idb"
 import type { PlasmoCSConfig } from "plasmo"
 

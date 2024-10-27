@@ -1,3 +1,5 @@
+// background.ts
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (["listDatabases", "exportDatabase", "importDatabase"].includes(message.action)) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
