@@ -49,6 +49,9 @@ const ExportDB = () => {
           } else {
             const blob = new Blob([response.json], { type: "application/json" })
             const url = URL.createObjectURL(blob)
+
+            console.log(`Downloading ${dbName}.json`)
+
             chrome.downloads.download({
               url,
               filename: `${dbName}.json`,
